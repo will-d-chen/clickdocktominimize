@@ -6,6 +6,11 @@ class ClickDockToMinimize: NSObject {
     var runLoopSource: CFRunLoopSource?
     var dockElement: AXUIElement?
     var dockPID: pid_t = 0
+    
+    // Mapping Mode State
+    var isMappingMode: Bool = false
+    var pendingMappingAppID: String?
+    var pendingMappingAppName: String?
 
     override init() {
         super.init()
@@ -163,8 +168,43 @@ class ClickDockToMinimize: NSObject {
 
                     NSLog("ClickDockToMinimize: Clicked dock icon: '\(title)'")
 
+                    if isMappingMode {
+                        if let appID = pendingMappingAppID, let appName = pendingMappingAppName {
+                            var mappings = UserDefaults.standard.dictionary(forKey: "CustomAppMappings") as? [String: String] ?? [:]
+                            mappings[title] = appID
+                            UserDefaults.standard.set(mappings, forKey: "CustomAppMappings")
+                            
+                            isMappingMode = false
+                            pendingMappingAppID = nil
+                            pendingMappingAppName = nil
+                            
+                            NSLog("ClickDockToMinimize: Mapped dock icon '\(title)' to app '\(appName)' (\(appID))")
+                            
+                            DispatchQueue.main.async {
+                                let alert = NSAlert()
+                                alert.messageText = "Mapping Successful"
+                                alert.informativeText = "Successfully linked dock icon '\(title)' to application '\(appName)'."
+                                alert.addButton(withTitle: "OK")
+                                NSApplication.shared.activate(ignoringOtherApps: true)
+                                alert.runModal()
+                            }
+                            return nil // Pass event through to Dock, we intercepted what we needed
+                        }
+                    }
+
                     // Find the running app - try multiple matching strategies
                     let runningApps = NSWorkspace.shared.runningApplications
+
+                    // Strategy 0: Custom Mappings
+                    if let mappings = UserDefaults.standard.dictionary(forKey: "CustomAppMappings") as? [String: String],
+                       let mappedAppID = mappings[title] {
+                        for app in runningApps {
+                            if app.bundleIdentifier == mappedAppID || app.localizedName == mappedAppID {
+                                NSLog("ClickDockToMinimize: Found app by custom mapping: \(mappedAppID)")
+                                return app
+                            }
+                        }
+                    }
 
                     // Strategy 1: Exact match on localizedName
                     for app in runningApps {
@@ -302,6 +342,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem(title: "Active", action: nil, keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Click on any dock icon to minimize!", action: nil, keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Link Active App to Next Dock Click", action: #selector(startMapping), keyEquivalent: "m"))
+        menu.addItem(NSMenuItem(title: "Clear All Mappings", action: #selector(clearMappings), keyEquivalent: ""))
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
         statusItem?.menu = menu
 
@@ -317,12 +360,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 let alert = NSAlert()
                 alert.messageText = "Permissions Required"
-                alert.informativeText = "ClickDockToMinimize needs Accessibility permissions. Please grant access in System Settings > Privacy & Security > Accessibility, then restart the app."
+                alert.informativeText = "ClickDockToMinimize needs Accessibility and Input Monitoring permissions. Please grant access in System Settings > Privacy & Security > Accessibility AND Input Monitoring, then restart the app."
                 alert.alertStyle = .warning
                 alert.addButton(withTitle: "OK")
                 alert.runModal()
             }
         }
+    }
+
+    @objc func startMapping() {
+        guard let frontmost = NSWorkspace.shared.frontmostApplication else {
+            NSLog("ClickDockToMinimize: No frontmost application found for mapping.")
+            return
+        }
+        
+        // Don't map ourselves or the Dock
+        if frontmost.bundleIdentifier == "com.apple.dock" || frontmost.bundleIdentifier == Bundle.main.bundleIdentifier {
+            return
+        }
+        
+        let appName = frontmost.localizedName ?? "Unknown App"
+        let bundleID = frontmost.bundleIdentifier ?? appName
+        
+        minimizer?.pendingMappingAppID = bundleID
+        minimizer?.pendingMappingAppName = appName
+        minimizer?.isMappingMode = true
+        
+        NSLog("ClickDockToMinimize: Mapping Mode active. Waiting for click to map to \(appName)")
+    }
+
+    @objc func clearMappings() {
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        UserDefaults.standard.removeObject(forKey: "CustomAppMappings")
+        NSLog("ClickDockToMinimize: Cleared all custom mappings")
+        
+        let alert = NSAlert()
+        alert.messageText = "Mappings Cleared"
+        alert.informativeText = "All custom app mappings have been removed."
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 
     @objc func quit() {

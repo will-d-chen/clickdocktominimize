@@ -1,0 +1,18 @@
+# macOS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Compiled binary
+clickdocktominimize
+
+# Application bundle
+ClickDockToMinimize.app/
+
+# Xcode / Swift build artifacts (if you ever use Xcode or Swift Package Manager)
+.build/
+*.app.dSYM
+*.xcworkspace
+xcuserdata/

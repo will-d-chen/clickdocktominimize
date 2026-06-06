@@ -10,7 +10,6 @@ clickdocktominimize
 
 # Application bundle
 ClickDockToMinimize.app/
-ClickDockToMinimize.zip
 
 # Xcode / Swift build artifacts (if you ever use Xcode or Swift Package Manager)
 .build/

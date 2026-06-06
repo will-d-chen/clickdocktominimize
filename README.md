@@ -1,8 +1,12 @@
 # ClickDockToMinimize
 
-**ClickDockToMinimize** I built this macOS utility that brings a small (but one that I couldn't live without) feature from other operating systems: the ability to click on an active application's Dock icon to minimize its windows. You no longer have to go to the corner of the app and find the yellow circle or use hotkeys!
+I built this macOS utility that brings a small (but one that I couldn't live without) feature from other operating systems: the ability to click on an active application's Dock icon to minimize its windows. You no longer have to go to the corner of the app and find the yellow circle or use hotkeys!
 
 If an application is currently frontmost and has visible windows, simply clicking its icon in the Dock will minimize it. If the windows are already minimized, clicking the Dock icon will re-open it.
+
+## Demo
+
+![ClickDockToMinimize Demo](demo.mov)
 
 ## Features
 
@@ -13,7 +17,7 @@ If an application is currently frontmost and has visible windows, simply clickin
 
 ## Requirements
 
-- **Permissions**: This app requires **Accessibility** and **Input Monitoring** permissions to function, as it needs to detect mouse clicks on the Dock and manage application windows. NOTE: this is an invasive permissions granting request, but it's the only way I could figure out how to do this. I built this as a personal project, and I am not a security expert, so I am not entirely sure if this is safe. But I assume it's fine since it's local only and the script is short enough that if you're worried I'm sending your keystrokes to the mothership you can verify it yourself.
+- **Permissions**: This app requires **Accessibility** and **Input Monitoring** permissions to function, as it needs to detect mouse clicks on the Dock and manage application windows. NOTE: this is an invasive permissions granting request, but it's the only way I could figure out how to do this. I built this as a personal project, and I am not a security expert, so I am not entirely sure if this is safe. But I assume it's fine since it's local only, and the script is short enough that if you're worried I'm sending your keystrokes to the mothership you can verify it yourself.
 
 ## Installation & Setup
 

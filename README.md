@@ -6,7 +6,7 @@ If an application is currently frontmost and has visible windows, simply clickin
 
 ## Demo
 
-<video src="demo.mov" autoplay loop muted playsinline width="100%"></video>
+![ClickDockToMinimize Demo](demo.gif)
 
 ## Features
 

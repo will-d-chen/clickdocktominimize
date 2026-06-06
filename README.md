@@ -70,7 +70,7 @@ EOF
 
 ### Option 2: Download Pre-compiled App
 
-Alternatively, if you do not want to build it yourself, you can check the **Releases** page of this GitHub repository to download a pre-compiled `ClickDockToMinimize.app.zip`.
+Alternatively, if you do not want to build it yourself, you can check the **Releases** page of this GitHub repository to download a pre-compiled app inside `ClickDockToMinimize.zip`.
 
 ## Usage
 
